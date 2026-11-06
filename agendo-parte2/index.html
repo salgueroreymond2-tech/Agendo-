@@ -47,7 +47,7 @@
     const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' })[char]);
     const money = value => new Intl.NumberFormat('es-CR',{style:'currency',currency:'USD',minimumFractionDigits:0}).format(Number(value) || 0);
     const safeBusiness = () => escapeHtml(state.businessName.trim() || 'Tu barbería');
-    const localLink = () => `agendo-demo.local/reservas/${encodeURIComponent((state.businessName.trim() || 'tu-barberia').toLowerCase().replace(/\s+/g,'-'))}`;
+    const localLink = () => state.business?.slug ? `${window.location.origin}/reservas/${encodeURIComponent(state.business.slug)}` : `agendo-demo.local/reservas/${encodeURIComponent((state.businessName.trim() || 'tu-barberia').toLowerCase().replace(/\s+/g,'-'))}`;
     const header = () => `<header class="topbar"><button class="brand" data-action="home" aria-label="Volver al inicio de AGENDO"><span class="brand-mark">A</span><span>AGENDO</span></button><div class="top-actions"><button class="btn ghost small" data-action="open-booking">Ver reservas</button><button class="btn secondary small" data-action="open-panel">Panel Valeria</button></div></header>`;
     const progress = step => `<div class="progress" aria-label="Progreso de configuración"><span class="${step>=1?'on':''}"></span><span class="${step>=2?'on':''}"></span><span class="${step>=3?'on':''}"></span></div><p class="step-copy">Configuración rápida · paso ${step} de 3</p>`;
     const error = () => `<p class="error" role="alert">${escapeHtml(state.error)}</p>`;
@@ -68,7 +68,129 @@
     async function copyText(text, success) { try { if (!navigator.clipboard) throw new Error('clipboard unavailable'); await navigator.clipboard.writeText(text); state.notice=success; } catch { state.notice=`No se pudo copiar automáticamente. Selecciona y copia este texto: ${text}`; } render(); }
     app.addEventListener('input', event => { const target=event.target; if (target.dataset.field) { state[target.dataset.field]=target.value; } if (target.dataset.serviceIndex !== undefined) { const service=state.services[Number(target.dataset.serviceIndex)]; const key=target.dataset.serviceKey; service[key]=key==='name'?target.value:Number(target.value); } });
     app.addEventListener('click', event => { const button=event.target.closest('[data-action]'); if (!button) return; const action=button.dataset.action; state.error=''; if(action==='home') return setScreen('welcome'); if(action==='open-panel') return setScreen('panel'); if(action==='open-booking') return setScreen('booking'); if(action==='back-welcome') return setScreen('welcome'); if(action==='back-services') return setScreen('services'); if(action==='back-schedule') return setScreen('schedule'); if(action==='back-publish') return setScreen('publish'); if(action==='start') { if(!state.businessName.trim()) { state.error='Escribe el nombre de tu negocio para continuar.'; return render(); } return setScreen('services'); } if(action==='add-service') { state.services.push({name:'Nuevo servicio',price:10,duration:30}); return render(); } if(action==='remove-service') { if(state.services.length===1){ state.error='Necesitas al menos un servicio para publicar.'; return render(); } state.services.splice(Number(button.dataset.index),1); return render(); } if(action==='services-next') { if(!validServices()){ state.error='Completa nombre, precio y duración de al menos un servicio.'; return render(); } return setScreen('schedule'); } if(action==='toggle-day') { const day=button.dataset.day; state.selectedDays=state.selectedDays.includes(day)?state.selectedDays.filter(item=>item!==day):[...state.selectedDays,day]; return render(); } if(action==='apply-hours') { if(!state.selectedDays.length){ state.error='Selecciona al menos un día para aplicar el horario.'; return render(); } if(state.templateStart>=state.templateEnd){ state.error='La hora de apertura debe ser anterior al cierre.'; return render(); } state.selectedDays.forEach(day=>state.schedule[day]={active:true,start:state.templateStart,end:state.templateEnd}); return render(); } if(action==='schedule-next') { if(!Object.values(state.schedule).some(item=>item.active)){ state.error='Publica al menos un día y horario disponible.'; return render(); } return setScreen('publish'); } if(action==='copy-link') return copyText(localLink(),'Enlace de demostración copiado. Recuerda: solo funciona como representación local.'); if(action==='copy-message') return copyText(`Reserva tu cita en ${state.businessName}: ${localLink()}`,'Texto preparado para Instagram copiado. Debes pegarlo manualmente.'); if(action==='simulate-reservation') { state.simulatedReservation=true; return setScreen('success'); } });
+    window.AgendoPrototype = { state, render, setScreen };
     render();
+  </script>
+  <script>
+    'use strict';
+    (() => {
+      const prototype = window.AgendoPrototype;
+      const app = document.getElementById('app');
+      if (!prototype || !app) return;
+      const state = prototype.state;
+      const apiBase = window.location.protocol === 'file:' ? 'http://localhost:3000/api/v1' : '/api/v1';
+      const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
+      const isPublicRoute = () => /^\/reservas\/[^/]+$/.test(window.location.pathname);
+      const api = async (path, options = {}) => {
+        const response = await fetch(`${apiBase}${path}`, { credentials: 'include', headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers ?? {}) }, ...options });
+        if (response.status === 204) return null;
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error?.message || 'No fue posible completar la operación.');
+        return payload.data;
+      };
+      const showError = (message) => { state.error = message; prototype.render(); };
+      const showNotice = (message) => { state.notice = message; prototype.render(); };
+
+      function addAccessFields() {
+        if (isPublicRoute() || document.getElementById('owner-access-fields')) return;
+        const anchor = app.querySelector('.welcome .field');
+        if (!anchor) return;
+        const panel = document.createElement('section');
+        panel.id = 'owner-access-fields';
+        panel.className = 'service-card';
+        panel.innerHTML = `<div class="service-top"><strong>Acceso del propietario</strong><span class="pill">Datos reales</span></div>
+          <p class="muted">Crea una cuenta para guardar tu configuración. No se solicitan datos fiscales durante este paso.</p>
+          <div class="service-fields"><label>Nombre<input data-field="ownerFirstName" autocomplete="given-name" value="${escapeHtml(state.ownerFirstName)}"></label><label>Apellido<input data-field="ownerLastName" autocomplete="family-name" value="${escapeHtml(state.ownerLastName)}"></label><label>Correo<input data-field="ownerEmail" type="email" autocomplete="email" value="${escapeHtml(state.ownerEmail)}"></label></div>
+          <label class="field"><span>Contraseña</span><input data-field="ownerPassword" type="password" autocomplete="new-password" minlength="12"><small class="tiny">Mínimo 12 caracteres. Se guarda únicamente su hash seguro.</small></label>
+          <button class="btn ghost small" data-api-action="login">Ya tengo una cuenta: iniciar sesión</button>`;
+        anchor.insertAdjacentElement('afterend', panel);
+      }
+
+      const observer = new MutationObserver(addAccessFields);
+      observer.observe(app, { childList: true, subtree: true });
+
+      function identityInput() {
+        return {
+          firstName: state.ownerFirstName?.trim(), lastName: state.ownerLastName?.trim(),
+          email: state.ownerEmail?.trim(), password: state.ownerPassword
+        };
+      }
+      async function authenticate(mode) {
+        const identity = identityInput();
+        if (!identity.email || !identity.password || (mode === 'register' && (!identity.firstName || !identity.lastName))) throw new Error(mode === 'register' ? 'Completa tu nombre, apellido, correo y contraseña para crear la cuenta.' : 'Completa correo y contraseña para iniciar sesión.');
+        const body = mode === 'register' ? identity : { email: identity.email, password: identity.password };
+        const result = await api(`/auth/${mode}`, { method: 'POST', body: JSON.stringify(body) });
+        state.user = result.user;
+      }
+      async function createBusinessIfNeeded() {
+        if (state.business) return state.business;
+        if (!state.businessName?.trim()) throw new Error('Escribe el nombre de tu negocio para continuar.');
+        const result = await api('/businesses', { method: 'POST', body: JSON.stringify({ name: state.businessName.trim(), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Costa_Rica' }) });
+        state.business = result.business;
+        await api('/onboarding/events', { method: 'POST', body: JSON.stringify({ businessId: state.business.id, eventName: 'onboarding_started' }) });
+        return state.business;
+      }
+      async function beginRealOnboarding(mode) {
+        try {
+          if (!state.user) await authenticate(mode);
+          await createBusinessIfNeeded();
+          state.error = ''; prototype.setScreen('services');
+        } catch (error) { showError(error.message); }
+      }
+      async function persistServices() {
+        const business = await createBusinessIfNeeded();
+        if (!state.services?.length || state.services.some((service) => !String(service.name).trim() || Number(service.price) <= 0 || Number(service.duration) <= 0)) throw new Error('Completa nombre, precio y duración de al menos un servicio.');
+        for (let index = 0; index < state.services.length; index += 1) {
+          const service = state.services[index];
+          const payload = { name: String(service.name).trim(), price: Number(service.price), durationMinutes: Number(service.duration) };
+          const result = service.id ? await api(`/services/${service.id}`, { method: 'PATCH', body: JSON.stringify(payload) }) : await api(`/businesses/${business.id}/services`, { method: 'POST', body: JSON.stringify(payload) });
+          state.services[index] = { ...service, ...result.service, duration: result.service.durationMinutes };
+        }
+        state.error = ''; prototype.setScreen('schedule');
+      }
+      async function persistScheduleAndPublish() {
+        try {
+          const business = await createBusinessIfNeeded();
+          const dayMap = { Dom: 0, Lun: 1, Mar: 2, 'Mié': 3, Jue: 4, Vie: 5, Sáb: 6 };
+          const hours = Object.entries(state.schedule).map(([day, value]) => ({ dayOfWeek: dayMap[day], isClosed: !value.active, ...(value.active ? { openingTime: value.start, closingTime: value.end } : {}) }));
+          await api(`/businesses/${business.id}/hours`, { method: 'PUT', body: JSON.stringify({ hours }) });
+          const published = await api(`/businesses/${business.id}/publish`, { method: 'POST' });
+          state.business = published.business;
+          state.error = ''; prototype.setScreen('publish');
+        } catch (error) { showError(error.message); }
+      }
+      function captureAction(event) {
+        const target = event.target.closest('[data-api-action], [data-action]');
+        if (!target || isPublicRoute()) return;
+        const apiAction = target.dataset.apiAction;
+        const action = target.dataset.action;
+        if (apiAction === 'login') { event.preventDefault(); event.stopImmediatePropagation(); void beginRealOnboarding('login'); return; }
+        if (action === 'start') { event.preventDefault(); event.stopImmediatePropagation(); void beginRealOnboarding('register'); return; }
+        if (action === 'services-next' && state.business) { event.preventDefault(); event.stopImmediatePropagation(); void persistServices().catch((error) => showError(error.message)); return; }
+        if (action === 'schedule-next' && state.business) { event.preventDefault(); event.stopImmediatePropagation(); void persistScheduleAndPublish(); }
+      }
+      app.addEventListener('click', captureAction, true);
+      app.addEventListener('click', (event) => {
+        const share = event.target.closest('a');
+        if (share?.textContent?.includes('WhatsApp') && state.business) api('/onboarding/events', { method: 'POST', body: JSON.stringify({ businessId: state.business.id, eventName: 'booking_link_shared', metadata: { channel: 'whatsapp' } }) }).catch(() => {});
+      }, true);
+
+      async function renderPublicBooking() {
+        const slug = decodeURIComponent(window.location.pathname.split('/').pop());
+        try {
+          const [servicePayload, availabilityPayload] = await Promise.all([api(`/public/businesses/${encodeURIComponent(slug)}/services`), api(`/public/businesses/${encodeURIComponent(slug)}/availability`)]);
+          const business = servicePayload.business;
+          const services = servicePayload.services;
+          const hours = availabilityPayload.hours.filter((hour) => !hour.isClosed).map((hour) => `Día ${hour.dayOfWeek}: ${hour.openingTime}–${hour.closingTime}`).join(' · ');
+          app.innerHTML = `<header class="topbar"><div class="brand"><span class="brand-mark">A</span><span>AGENDO</span></div><span class="pill">Reservas</span></header><section id="contenido" class="card main-card wide"><div class="booking-head"><div><span class="pill">Página pública</span><h2>${escapeHtml(business.name)}</h2><p>${escapeHtml(business.description || 'Agenda tu próxima cita.')}</p></div></div><div class="booking-main"><div class="booking-layout"><div><h3>Servicios disponibles</h3><div class="preview-services">${services.map((service) => `<div class="preview-service"><span><strong>${escapeHtml(service.name)}</strong><br><small>${escapeHtml(service.durationMinutes)} min</small></span><strong>USD ${escapeHtml(service.price)}</strong></div>`).join('')}</div></div><aside class="booking-summary"><h3>Horario</h3><p class="muted">${escapeHtml(hours || 'Consulta disponibilidad con el negocio.')}</p><small>Zona horaria: ${escapeHtml(business.timezone)}</small></aside></div><form id="public-booking-form"><h3>Solicita una reserva</h3><label class="field"><span>Servicio</span><select name="serviceId" required>${services.map((service) => `<option value="${service.id}">${escapeHtml(service.name)} · ${escapeHtml(service.durationMinutes)} min</option>`).join('')}</select></label><label class="field"><span>Nombre</span><input name="customerName" required maxlength="160" autocomplete="name"></label><label class="field"><span>Correo</span><input name="customerEmail" type="email" autocomplete="email"></label><label class="field"><span>Teléfono</span><input name="customerPhone" maxlength="32" autocomplete="tel"></label><label class="field"><span>Fecha y hora</span><input name="appointmentStart" type="datetime-local" step="300" required></label><label class="field"><span>Notas opcionales</span><input name="notes" maxlength="3000"></label><button class="btn primary" type="submit">Solicitar reserva</button><p id="public-booking-message" class="error" role="status"></p></form><button class="badge" type="button" onclick="window.location.href='/'">✦ Reservado con AGENDO · Conoce AGENDO para tu barbería</button></div></section>`;
+          document.getElementById('public-booking-form').addEventListener('submit', async (event) => {
+            event.preventDefault(); const form = new FormData(event.currentTarget); const message = document.getElementById('public-booking-message');
+            try { const created = await api(`/public/businesses/${encodeURIComponent(slug)}/bookings`, { method: 'POST', body: JSON.stringify({ serviceId: form.get('serviceId'), customerName: form.get('customerName'), customerEmail: form.get('customerEmail') || undefined, customerPhone: form.get('customerPhone') || undefined, appointmentStart: new Date(form.get('appointmentStart')).toISOString(), notes: form.get('notes') || undefined }) }); message.className = 'notice'; message.textContent = `Reserva registrada con estado ${created.booking.status}. El negocio confirmará la cita.`; event.currentTarget.reset(); } catch (error) { message.className = 'error'; message.textContent = error.message; }
+          });
+        } catch (error) { app.innerHTML = `<section class="card main-card"><h2>Página no disponible</h2><p class="muted">${escapeHtml(error.message)}</p></section>`; }
+      }
+      if (isPublicRoute()) void renderPublicBooking(); else addAccessFields();
+    })();
   </script>
 </body>
 </html>

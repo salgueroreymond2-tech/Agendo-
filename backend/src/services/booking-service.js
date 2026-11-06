@@ -82,6 +82,9 @@ export async function updateBookingStatus(user, bookingId, status) {
 
 export async function publicAvailability(slug) {
   const business = await getPublicBusiness(slug);
-  const hours = await BusinessHour.findAll({ where: { businessId: business.id }, order: [['day_of_week', 'ASC'], ['opening_time', 'ASC']] });
-  return { business, hours };
+  const [hours, occupiedIntervals] = await Promise.all([
+    BusinessHour.findAll({ where: { businessId: business.id }, order: [['day_of_week', 'ASC'], ['opening_time', 'ASC']] }),
+    Booking.findAll({ where: { businessId: business.id, isSimulated: false, status: { [Op.in]: blockingStatuses }, appointmentEnd: { [Op.gt]: new Date() } }, attributes: ['appointmentStart', 'appointmentEnd'], order: [['appointment_start', 'ASC']] })
+  ]);
+  return { business, hours, occupiedIntervals };
 }

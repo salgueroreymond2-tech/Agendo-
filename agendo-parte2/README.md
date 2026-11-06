@@ -4,7 +4,7 @@ Prototipo local del nuevo onboarding para barberías. Está diseñado para demos
 
 ## Abrir el prototipo
 
-Abre `index.html` directamente en un navegador moderno. No necesita servidor, instalación, cuenta, base de datos ni conexión a Internet para el recorrido principal.
+Para el recorrido visual simulado, puedes abrir `index.html` directamente. Para registro, persistencia, URL pública y reservas reales, configura e inicia `backend/` y abre `http://localhost:3000/`; el modo `file://` no puede ofrecer autenticación ni datos persistidos.
 
 ## Recorrido de demostración
 
@@ -17,10 +17,10 @@ Abre `index.html` directamente en un navegador moderno. No necesita servidor, in
 
 ## Límites conocidos
 
-- El enlace mostrado representa una publicación local; no es una URL pública.
+- Sin backend, el enlace mostrado representa una publicación local. Con el backend iniciado y la barbería publicada, el enlace utiliza `/reservas/:slug` en el origen real.
 - WhatsApp puede abrir su compartidor cuando el navegador lo permita. Instagram requiere copiar y pegar el texto manualmente.
 - La reserva, los servicios, los horarios y la barbería de ejemplo son datos simulados y se etiquetan en la interfaz.
-- El prototipo no procesa pagos, no guarda datos y no realiza notificaciones reales.
+- El backend guarda usuarios, negocios, servicios, horarios y reservas reales; no procesa pagos ni realiza notificaciones reales.
 - El PDF de la Parte 2 no estaba disponible en el repositorio importado; las cifras provienen del prompt recibido.
 
 ## Archivos

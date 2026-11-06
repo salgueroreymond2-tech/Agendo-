@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "migrate": "node scripts/migrate.js up",
     "migrate:undo": "node scripts/migrate.js down",
+    "seed:dev": "node scripts/seed-development.js",
     "test": "vitest run"
   },
   "dependencies": {
