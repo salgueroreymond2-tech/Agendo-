@@ -126,6 +126,7 @@ Los negocios que comparten tienen más primeras reservas observadas, pero el an�
 ## F. Errores o dudas de la IA
 
 - **D-01 — Documento fuente:** el PDF de la Parte 2 no está disponible en el repositorio importado. Este análisis usa exclusivamente los datos transcritos por el usuario y debe contrastarse con el documento original cuando esté disponible.
+- **D-02 — Cálculo del prototipo:** la primera versión del código trató 13,88 % y 14,68 % como proporciones al calcular clientes paid. La prueba local detectó el error; se dividieron entre 100 antes de multiplicar por 500 trials. El escenario corregido es 73,4 clientes paid y CAC paid de USD 172,59.
 - No se ha identificado un error matemático en esta etapa. La diferencia entre 13,88 % y 14 % se preserva como una diferencia de redondeo/agregación, no se corrige artificialmente.
 
 ## G. Próximo paso
