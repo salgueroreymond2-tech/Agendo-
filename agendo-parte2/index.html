@@ -106,7 +106,12 @@
         anchor.insertAdjacentElement('afterend', panel);
       }
 
-      const observer = new MutationObserver(addAccessFields);
+      function enhanceScreen() {
+        addAccessFields();
+        const publishDescription = document.querySelector('#publish-title + p.muted');
+        if (state.business?.slug && publishDescription) publishDescription.textContent = 'Tu página está publicada. Este enlace usa el servidor actual y puede compartirse con clientes.';
+      }
+      const observer = new MutationObserver(enhanceScreen);
       observer.observe(app, { childList: true, subtree: true });
 
       function identityInput() {
@@ -167,7 +172,8 @@
         if (apiAction === 'login') { event.preventDefault(); event.stopImmediatePropagation(); void beginRealOnboarding('login'); return; }
         if (action === 'start') { event.preventDefault(); event.stopImmediatePropagation(); void beginRealOnboarding('register'); return; }
         if (action === 'services-next' && state.business) { event.preventDefault(); event.stopImmediatePropagation(); void persistServices().catch((error) => showError(error.message)); return; }
-        if (action === 'schedule-next' && state.business) { event.preventDefault(); event.stopImmediatePropagation(); void persistScheduleAndPublish(); }
+        if (action === 'schedule-next' && state.business) { event.preventDefault(); event.stopImmediatePropagation(); void persistScheduleAndPublish(); return; }
+        if (action === 'open-booking' && state.business?.slug) { event.preventDefault(); event.stopImmediatePropagation(); window.location.assign(`/reservas/${encodeURIComponent(state.business.slug)}`); }
       }
       app.addEventListener('click', captureAction, true);
       app.addEventListener('click', (event) => {
@@ -189,7 +195,7 @@
           });
         } catch (error) { app.innerHTML = `<section class="card main-card"><h2>Página no disponible</h2><p class="muted">${escapeHtml(error.message)}</p></section>`; }
       }
-      if (isPublicRoute()) void renderPublicBooking(); else addAccessFields();
+      if (isPublicRoute()) void renderPublicBooking(); else enhanceScreen();
     })();
   </script>
 </body>
