@@ -114,7 +114,15 @@
     .share-card:first-child { background:var(--color-primary-soft); border-color:#bfdbfe; }
     .local-url { padding:.55rem .65rem; border-radius:8px; color:#1d4ed8; background:#fff; border:1px dashed #93c5fd; }
     .booking-head { padding:1.25rem; }
+    .booking-main { gap:var(--space-3); }
     .booking-summary { border-color:#dbe4f1; border-radius:var(--radius-md); background:#f8fafc; }
+    .booking-summary h3 { margin-bottom:.45rem; }
+    .booking-summary small { color:var(--color-muted); }
+    .booking-main > .btn.primary { justify-self:start; }
+    #public-booking-form { display:grid; gap:.2rem; padding-top:var(--space-3); border-top:1px solid var(--color-border); }
+    #public-booking-form h3 { margin:.1rem 0 .25rem; }
+    #public-booking-form .field { margin:.45rem 0; }
+    #public-booking-message:not(:empty) { margin:0; }
     .badge { min-height:48px; border:1px solid #bfdbfe; color:#1e40af; background:#eff6ff; border-radius:var(--radius-sm); transition:background var(--transition-fast),border-color var(--transition-fast),transform var(--transition-fast); }
     .badge:hover { border-color:#93c5fd; background:#dbeafe; transform:translateY(-1px); }
     .reservation { border-color:#86efac; border-radius:var(--radius-lg); background:linear-gradient(135deg,#f0fdf4,#f7fef9); box-shadow:0 12px 28px rgba(22,163,74,.10); }
@@ -123,9 +131,12 @@
     .dashboard { animation:surface-in var(--transition-normal) both; }
     .dash-head { padding:var(--space-2) 0; }
     .kpis { gap:var(--space-2); }
-    .kpi { padding:1rem; border-radius:var(--radius-md); }
+    .kpi { position:relative; overflow:hidden; padding:1rem; border-radius:var(--radius-md); }
+    .kpi::before { content:""; position:absolute; inset:0 auto 0 0; width:4px; background:#93c5fd; }
+    .kpi:nth-child(2)::before { background:#60a5fa; }.kpi:nth-child(3)::before { background:#22c55e; }.kpi:nth-child(4)::before { background:#f59e0b; }
     .kpi small { font-weight:650; }.kpi strong { font-size:clamp(1.45rem,4vw,2rem); letter-spacing:-.05em; }
     .section { padding:var(--space-3); border-radius:var(--radius-md); }
+    .table-wrap { border:1px solid var(--color-border); border-radius:var(--radius-sm); }
     th { color:#475569; background:#f8fafc; } td { color:#334155; } table tbody tr:hover { background:#f8fbff; }
     .loop { gap:.55rem; }.loop span { border:1px solid #dbe4f1; border-radius:var(--radius-sm); background:#f8fafc; }
     .check { border:1px solid #dcfce7; border-radius:var(--radius-sm); background:#f7fef9; }.check b { color:#15803d; }
