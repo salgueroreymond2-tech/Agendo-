@@ -84,7 +84,8 @@
     .btn.ghost { color:#334155; border-color:#cbd5e1; background:#fff; }
     .btn.ghost:hover { border-color:#94a3b8; background:#f8fafc; }
     .btn.danger { color:#b91c1c; background:var(--color-danger-soft); }
-    .btn.small { min-height:36px; border-radius:9px; }
+    .btn.small { min-height:44px; border-radius:9px; }
+    :where(button,a,input,select,textarea):focus-visible { outline:3px solid rgba(37,99,235,.45); outline-offset:3px; }
     .progress { gap:.4rem; }
     .progress span { height:.32rem; background:#e2e8f0; }
     .progress span.on { background:linear-gradient(90deg,#2563eb,#60a5fa); }
@@ -131,7 +132,7 @@
     .footer-note { padding-bottom:var(--space-3); color:#94a3b8; }
     @keyframes surface-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     @media (min-width:700px) { .hero-copy { padding:2.4rem; }.main-card { padding:2rem; }.topbar { padding-top:1rem; }.section { padding:1.25rem; } }
-    @media (max-width:430px) { .shell { padding:.75rem; }.topbar { padding-bottom:1rem; }.top-actions .ghost { display:inline-flex; padding:.5rem .55rem; font-size:.78rem; }.top-actions .btn { min-height:38px; }.hero-copy { padding:1.25rem; }.hero-side { min-height:180px; padding:1.25rem; }.main-card { padding:1.1rem; }.btn { width:100%; }.actions .btn:not(.small) { flex:1; }.action-right { gap:.5rem; }.service-top { align-items:flex-start; flex-wrap:wrap; }.service-top .danger { margin-left:auto; }.kpis { grid-template-columns:1fr 1fr; }.publication { gap:.8rem; } }
+    @media (max-width:430px) { .shell { padding:.75rem; }.topbar { padding-bottom:1rem; }.top-actions .ghost { display:none; }.top-actions .btn { width:auto; min-height:44px; padding:.5rem .65rem; white-space:nowrap; }.hero-copy { padding:1.25rem; }.hero-side { min-height:180px; padding:1.25rem; }.main-card { padding:1.1rem; }.btn { width:100%; }.actions .btn:not(.small) { flex:1; }.action-right { gap:.5rem; }.action-right .btn { min-width:0; }.service-top { align-items:flex-start; flex-wrap:wrap; }.service-top .danger { margin-left:auto; }.kpis { grid-template-columns:1fr 1fr; }.publication { gap:.8rem; }.booking-head { flex-direction:column; }.booking-head .btn { width:100%; } }
     @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
   </style>
 </head>
