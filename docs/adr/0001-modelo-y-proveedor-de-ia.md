@@ -1,8 +1,9 @@
-# ADR-0001: El asesor financiero usa reglas deterministas y no un proveedor de IA
+# ADR 001: Selección del modelo y proveedor de IA — motor determinista local
 
 - Estado: Aceptado
 - Fecha: 2026-11-13
 - Decide: Equipo responsable de AGENDO, rol de mantenimiento del producto; nombre individual pendiente de confirmar
+- Responsables: Equipo responsable de AGENDO; asignación individual pendiente de confirmar
 
 ## Contexto
 

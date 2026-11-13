@@ -21,6 +21,21 @@ Este registro cubre el dashboard financiero, el frontend de onboarding, la API E
 | R7 | La vulnerabilidad moderada transitiva de `uuid@8.3.2` reportada por `npm audit --omit=dev` permanece al depender de Sequelize 6. | Operación de AGENDO y personas cuyos datos procesa. | M | M | Documentar el hallazgo, vigilar actualizaciones compatibles de Sequelize y probar una actualización antes de aplicarla. No usar `audit fix --force` sin evaluación. | Pendiente | Equipo de backend |
 | R8 | Una integración futura de LLM, pagos, notificaciones o analítica externa transmite datos sin actualizar inventario, ADRs, contratos y controles. | Personas usuarias, propietarios y AGENDO. | M | A | `AGENTS.md` exige actualizar gobernanza y obtener aprobación humana antes de añadir terceros, IA, pagos o almacenamiento externo. | En curso | Equipo responsable de AGENDO |
 
+### Matriz de riesgos requerida por la práctica
+
+La tabla siguiente incorpora categoría y nivel numérico sin alterar la tabla anterior, cuya estructura es compatible con el verificador del Governance Pack.
+
+> | ID | Riesgo | Categoría | Probabilidad | Impacto | Nivel | Mitigación | Responsable | Estado |
+> | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+> | R1 | Acceso indebido a cuentas, negocios o reservas | Seguridad y privacidad | 2 | 3 | 6 — Alto | Sesiones seguras, bcrypt, HMAC, autorización por negocio y mínimos privilegios pendientes para MySQL | Equipo de backend y responsable de infraestructura | En curso |
+> | R2 | Datos sensibles o instrucciones maliciosas en notas o metadatos libres | Privacidad y seguridad de contenido | 2 | 3 | 6 — Alto | Minimización, esquema permitido, filtrado, retención y revisión de contenido no confiable | Equipo de producto y backend | Pendiente |
+> | R3 | Pérdida de datos por ausencia de backup y recuperación verificables | Continuidad operativa | 2 | 3 | 6 — Alto | Backups cifrados, restauraciones probadas y objetivos de recuperación antes de producción | Responsable de infraestructura | Pendiente |
+> | R4 | Decisión financiera tomada como si fuera autónoma o cierta | Modelo determinista y operación | 2 | 2 | 4 — Medio | Mantener supuestos visibles y aprobación humana para gasto, precios y campañas | Responsable financiero o de producto | En curso |
+> | R5 | Reserva duplicada por concurrencia | Integridad y disponibilidad | 1 | 2 | 2 — Bajo | Transacciones, bloqueo e índice único de slots; pruebas de integración pendientes | Equipo de backend | En curso |
+> | R6 | Exposición de datos en logs o exportaciones locales | Privacidad y operación | 2 | 2 | 4 — Medio | Redacción Pino, control de acceso a logs y manejo seguro de exportaciones | Backend y operaciones | En curso |
+> | R7 | Vulnerabilidad transitiva de `uuid@8.3.2` | Dependencias y seguridad | 2 | 2 | 4 — Medio | Vigilar actualización compatible de Sequelize y probarla antes de adoptar | Equipo de backend | Pendiente |
+> | R8 | Tercero, pagos o LLM integrado sin gobernanza previa | IA, proveedores y cumplimiento | 2 | 3 | 6 — Alto | ADR, inventario, evaluación de proveedor y aprobación humana previos | Equipo responsable de AGENDO | En curso |
+
 ## Plan de mitigación para riesgos altos
 
 ### R1: acceso indebido a datos operativos

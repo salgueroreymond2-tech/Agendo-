@@ -1,8 +1,9 @@
-# ADR-0003: Los datos operativos residen en MySQL y los escenarios financieros en el navegador
+# ADR 003: Ubicación y almacenamiento de datos
 
 - Estado: Aceptado
 - Fecha: 2026-11-13
 - Decide: Equipo responsable de AGENDO, rol de mantenimiento del producto; nombre individual pendiente de confirmar
+- Responsables: Equipo responsable de AGENDO; asignación individual pendiente de confirmar
 
 ## Contexto
 

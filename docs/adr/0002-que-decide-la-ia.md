@@ -1,8 +1,9 @@
-# ADR-0002: Los cálculos automatizados asesoran; las personas deciden y autorizan
+# ADR 002: Límites de decisión entre IA, automatización y personas
 
 - Estado: Aceptado
 - Fecha: 2026-11-13
 - Decide: Equipo responsable de AGENDO, rol de mantenimiento del producto; nombre individual pendiente de confirmar
+- Responsables: Equipo responsable de AGENDO; asignación individual pendiente de confirmar
 
 ## Contexto
 
@@ -26,7 +27,7 @@ Una persona propietaria autenticada decide los servicios, horarios y publicació
 
 ## Matriz de responsabilidades
 
-| Acción | IA o automatización | Persona | Requiere aprobación | Justificación |
+| Acción | IA | Persona | Requiere aprobación | Justificación |
 | --- | --- | --- | --- | --- |
 | Calcular CAC, LTV, flujo de caja y recomendación | Motor determinista local | Revisa supuestos y usa o descarta el resultado | Sí, para decisiones de negocio | Los cálculos dependen de supuestos y no ejecutan acciones externas |
 | Proponer presupuesto óptimo en un escenario | Optimizador determinista | Autoriza presupuesto real y campañas | Sí | No existe integración con plataformas publicitarias ni autorización automática de gasto |
