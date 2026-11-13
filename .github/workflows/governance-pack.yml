@@ -1,0 +1,48 @@
+# Verifica la forma del Governance Pack en cada pull request.
+#
+# Decisiones de seguridad (las mismas que vimos en el taller):
+# - Usa `pull_request` y NO `pull_request_target`: el cÃ³digo del PR nunca corre con secretos
+#   del repositorio. Esa combinaciÃ³n fue la que permitiÃ³ el ataque Â«Comment and ControlÂ» (2026).
+# - Permisos mÃ­nimos: leer el cÃ³digo y comentar en el PR. Nada mÃ¡s.
+# - La acciÃ³n de terceros estÃ¡ fijada a un commit exacto, no a una etiqueta que se puede mover.
+# - NingÃºn texto escrito por personas (tÃ­tulo del PR, comentarios) se mete en un comando de shell.
+#
+# Solo se dispara cuando cambian los archivos del pack, asÃ­ que no toca el resto de su CI.
+# Cuando terminen el reto pueden borrar este archivo sin ningÃºn efecto sobre su proyecto.
+
+name: Governance Pack
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'docs/adr/**'
+      - 'docs/gobernanza/**'
+      - '.github/governance-pack/**'
+      - '.github/workflows/governance-pack.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  verificar:
+    name: Verificar la forma del pack
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Descargar el cÃ³digo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verificar
+        run: node .github/governance-pack/verificar-pack.mjs . reporte.md
+
+      - name: Comentar el resultado en el PR
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file reporte.md
